@@ -1,216 +1,371 @@
-# 房屋價格合理性分析平台 MVP
+# 🏠 AI 房屋價格合理性分析平台
 
-一個幫助購屋者判斷房屋開價是否合理的 AI 分析平台。
+> 結合 AI 與實價登錄資料的房屋價格合理性分析平台，協助購屋者做出更好的決策。
 
-## 核心功能
+---
 
-✅ 輸入房屋資訊（地址、開價、坪數、屋齡、建物型態、樓層、車位等）  
-✅ 預設或自訂購屋因素權重  
-✅ 查詢相似房屋成交案例  
-✅ 計算合理價格區間  
-✅ 分析周邊環境（捷運、醫院、學校、公園距離）  
-✅ 生成綜合合理性分數  
-✅ 提供購買建議
+# 🌐 線上展示
 
-## 技術棧
+前端網站：
 
-**Frontend:**
-- React 18
+https://mason0416.github.io/real-estate-price-analysis/
+
+後端 API 文件：
+
+https://YOUR_RENDER_BACKEND.onrender.com/docs
+
+---
+
+# 📌 專案介紹
+
+本專案是一個 AI 房屋價格合理性分析平台，目標是協助正在看房、準備購屋的使用者，快速判斷房屋開價是否合理。
+
+本系統不預測未來房價，而是聚焦於：
+
+> 「這間房子現在這個價格是否值得購買？」
+
+系統會分析：
+
+- Taiwan real estate transaction records (實價登錄)
+- House attributes
+- Nearby facilities and accessibility
+- User preference weights
+
+並輸出：
+
+- Reasonable price range
+- Price fairness analysis
+- Weighted house score
+- Final buying suggestion
+
+---
+
+# ✨ 主要功能
+
+## 🔍 房屋價格合理性分析
+
+使用者可輸入：
+
+- Address
+- Asking price
+- Area (坪數)
+- Building age
+- Building type
+- Floor information
+- Parking information
+
+系統分析：
+
+- Reasonable market price
+- Whether the house is overpriced
+- Whether negotiation is recommended
+- Buying suggestions
+
+---
+
+## 🏙️ 周邊生活機能分析
+
+系統會分析：
+
+- MRT distance
+- Hospital distance
+- School distance
+- Park distance
+
+and evaluates overall convenience.
+
+---
+
+## 📊 相似成交案例比較
+
+系統會根據以下條件搜尋相似成交案例：
+
+- Location
+- Area
+- Building age
+- Building type
+- Floor
+
+using Taiwan real estate transaction data.
+
+---
+
+## ⚖️ 權重調整系統
+
+使用者可以：
+
+- Use default equal weights
+- Or customize preference weights
+
+Example adjustable weights:
+
+- Price
+- MRT accessibility
+- School distance
+- Building age
+- Parking
+- Park accessibility
+
+系統會根據使用者偏好重新計算綜合合理性分數。
+
+---
+
+# 🧠 系統定位
+
+本系統不是：
+
+❌ House price prediction AI  
+❌ Investment return prediction system  
+❌ Real estate market forecasting tool
+
+本系統是：
+
+✅ Home buying decision assistant  
+✅ House price fairness analysis platform  
+✅ Real-time buying support system
+
+---
+
+# 🏗️ 技術架構
+
+## Frontend
+
+- React
 - Vite
 - TailwindCSS
 
-**Backend:**
+---
+
+## Backend
+
 - FastAPI
-- SQLAlchemy
+- Python
+
+---
+
+## Database
+
 - SQLite
+- SQLAlchemy ORM
 
-## 快速開始
+---
 
-### 前置需求
+## Deployment
 
-- Node.js 18+
-- Python 3.9+
-- npm 或 yarn
+### Frontend
 
-### 安裝與運行
+- GitHub Pages
 
-#### 1. 後端設置
+### Backend
 
-```bash
-# 進入後端目錄
-cd backend
+- Render
 
-# 創建虛擬環境
-python -m venv venv
+---
 
-# 啟動虛擬環境
-# macOS/Linux:
-source venv/bin/activate
-# Windows:
-venv\Scripts\activate
-
-# 安裝依賴
-pip install -r requirements.txt
-
-# 運行後端服務 (localhost:8000)
-uvicorn main:app --reload
-```
-
-#### 2. 前端設置
-
-在新的終端視窗中：
+# 📁 專案結構
 
 ```bash
-# 進入前端目錄
-cd frontend
-
-# 安裝依賴
-npm install
-
-# 運行開發服務器 (localhost:5173)
-npm run dev
-```
-
-### 訪問應用
-
-打開瀏覽器訪問 `http://localhost:5173`
-
-## 使用流程
-
-1. 輸入目標房屋資訊
-2. （可選）點擊「進階設定」調整各項因素的重要程度
-3. 點擊「開始分析」
-4. 查看分析結果，包括：
-   - 合理價格區間
-   - 價格合理性評估
-   - 周邊生活機能評分
-   - 相似成交案例
-   - 綜合合理性分數
-   - 購買建議
-
-## API 端點
-
-### POST /analyze
-
-分析房屋價格合理性
-
-**請求參數：**
-```json
-{
-  "address": "台北市信義區光復路",
-  "askingPrice": 1000,
-  "area": 35,
-  "age": 8,
-  "buildingType": "building",
-  "floor": 8,
-  "totalFloors": 12,
-  "parking": "yes",
-  "layout": "3房2廳1衛",
-  "weights": {
-    "price": 30,
-    "mrt": 20,
-    "hospital": 10,
-    "school": 15,
-    "park": 10,
-    "age": 10,
-    "area": 0,
-    "floor": 0,
-    "parking": 5
-  }
-}
-```
-
-**響應範例：**
-```json
-{
-  "asking_price": 1000,
-  "reasonable_price_range": {
-    "min": 1100,
-    "max": 1200
-  },
-  "price_assessment": "價格合理",
-  "weighted_score": 75.5,
-  "nearby_facilities": {
-    "mrt": {"distance": 450, "rating": "便利"},
-    "hospital": {"distance": 650, "rating": "便利"},
-    "school": {"distance": 300, "rating": "非常便利"},
-    "park": {"distance": 500, "rating": "便利"}
-  },
-  "similar_cases": [...],
-  "recommendation": "這間房子各項條件都不錯，價格也很合理，值得認真考慮。"
-}
-```
-
-## 數據說明
-
-### 相似案例篩選條件
-
-- **地理位置：** 同區優先
-- **建物型態：** 必須相同
-- **坪數：** ±20% 範圍內
-- **屋齡：** ±5 年範圍內
-- **成交時間：** 近期數據優先
-
-### 評分標準
-
-- **價格合理性：** 與中位數單價的差距
-- **設施便利性：** 根據距離判斷
-- **屋況分數：** 基於屋齡和樓層位置
-- **綜合分數：** 根據用戶設置的權重計算
-
-## 目錄結構
-
-```
-/
-├── frontend/              # React 前端應用
+project/
+├── frontend/
 │   ├── src/
-│   │   ├── components/    # React 組件
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── index.html
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   └── package.json
-├── backend/               # FastAPI 後端
-│   ├── main.py            # 主應用
-│   ├── database.py        # 數據庫配置
-│   ├── schemas.py         # Pydantic 模型
-│   ├── analysis.py        # 核心分析邏輯
-│   └── requirements.txt
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.js
+│
+├── backend/
+│   ├── main.py
+│   ├── database.py
+│   ├── requirements.txt
+│   ├── runtime.txt
+│   └── property_analysis.db
+│
 └── README.md
 ```
 
-## MVP 限制
+---
 
-⚠️ 當前不包含以下功能：
-- 登入系統
-- 房屋推薦
-- 房價預測
-- 投資報酬預測
-- 地圖展示
-- 收藏/保存功能
-- 真實房地產數據（使用模擬數據）
+# 🚀 本地開發
 
-## 未來改進
+## Clone 專案
 
-- 集成真實實價登錄數據
-- 更精確的地理位置計算
-- 機器學習模型優化價格估算
-- 用戶賬戶系統
-- 房屋對比功能
-- 市場趨勢分析
+```bash
+git clone https://github.com/Mason0416/real-estate-price-analysis.git
+cd real-estate-price-analysis
+```
 
-## 常見問題
+---
 
-**Q: 相似案例不足怎麼辦？**  
-A: 確認房屋資訊輸入無誤，特別是建物型態和區域。在現有數據庫中，請盡量選擇台北市中心位置。
+# 🚀 前端啟動
 
-**Q: 分數如何計算？**  
-A: 綜合分數是各項評分按照用戶設置的權重加權平均，滿分 100。
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-**Q: 可以預測未來房價嗎？**  
-A: 不行。本平台只分析當前開價是否合理，不做任何房價預測。
+前端預設：
 
-## 許可證
+```bash
+http://localhost:5173
+```
 
-MIT
+---
+
+# 🚀 後端啟動
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+後端預設：
+
+```bash
+http://localhost:8000
+```
+
+API 文件：
+
+```bash
+http://localhost:8000/docs
+```
+
+---
+
+# 🌐 GitHub Pages 部署
+
+## vite.config.js
+
+```js
+export default defineConfig({
+  plugins: [react()],
+  base: '/real-estate-price-analysis/',
+})
+```
+
+---
+
+## 部署前端
+
+```bash
+cd frontend
+npm run build
+npm run deploy
+```
+
+---
+
+# ☁️ Render 後端部署
+
+## Render 設定
+
+### Root Directory
+
+```bash
+backend
+```
+
+### Build Command
+
+```bash
+pip install -r requirements.txt
+```
+
+### Start Command
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+---
+
+## runtime.txt
+
+```txt
+python-3.11.9
+```
+
+---
+
+# 🔌 API 串接
+
+## frontend/.env.production
+
+```env
+VITE_API_URL=https://YOUR_RENDER_BACKEND.onrender.com
+```
+
+---
+
+## Frontend API Example
+
+```js
+const API_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+const response = await fetch(`${API_URL}/analyze`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(payload),
+});
+```
+
+---
+
+# 📊 分析流程
+
+```text
+使用者輸入房屋資訊
+        ↓
+地址轉換為經緯度
+        ↓
+搜尋相似實價登錄資料
+        ↓
+計算合理價格區間
+        ↓
+分析周邊生活機能
+        ↓
+套用使用者權重
+        ↓
+輸出購屋建議
+```
+
+---
+
+# 📌 價格判斷邏輯
+
+```text
+低於合理價格 5% → 價格偏低
+合理價格 ±5% → 價格合理
+高於合理價格 5~10% → 略高
+高於合理價格 10% 以上 → 明顯偏高
+```
+
+---
+
+# 🛠️ 未來功能
+
+- Real-time transaction data updates
+- Interactive maps
+- House recommendation engine
+- User authentication
+- AI chat analysis
+- PostgreSQL + PostGIS
+- Advanced similarity algorithms
+
+---
+
+# 👨‍💻 作者
+
+魏宇浩  
+政治大學資訊科學系
+
+---
+
+# 📄 授權
+
+MIT License
+

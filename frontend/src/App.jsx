@@ -32,36 +32,60 @@ function App() {
     }, {})
   }
 
+  const API_URL =
+
+    import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
   const handleSubmit = async (formData) => {
+
     setLoading(true)
+
     try {
+
       const normalizedWeights = normalizeWeights(weights)
 
       const payload = {
+
         ...formData,
+
         weights: normalizedWeights,
+
       }
 
       console.log('Sending payload:', payload)
 
-      const response = await fetch('/api/analyze', {
+      const response = await fetch(`${API_URL}/analyze`, {
+
         method: 'POST',
+
         headers: { 'Content-Type': 'application/json' },
+
         body: JSON.stringify(payload),
+
       })
 
       if (!response.ok) {
+
         throw new Error(`API error: ${response.status}`)
+
       }
 
       const data = await response.json()
+
       setResults(data)
+
     } catch (error) {
+
       console.error('Error:', error)
+
       alert(`分析失敗: ${error.message}`)
+
     } finally {
+
       setLoading(false)
+
     }
+
   }
 
   const handleWeightsChange = (newWeights) => {

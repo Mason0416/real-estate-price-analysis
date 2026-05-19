@@ -16,6 +16,27 @@ from analysis import (
 )
 from database import SessionLocal, TransactionRecord
 import json
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+
+    CORSMiddleware,
+
+    allow_origins=[
+
+        "https://Mason0416.github.io",
+
+        "http://localhost:5173"
+
+    ],
+
+    allow_credentials=True,
+
+    allow_methods=["*"],
+
+    allow_headers=["*"],
+
+)
 
 app = FastAPI(title="Property Price Analysis API")
 

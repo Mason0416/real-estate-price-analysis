@@ -31,15 +31,11 @@ app.add_middleware(
 
 
 DEFAULT_WEIGHTS = {
-    "price": 0.30,
+    "price": 0.20,
     "mrt": 0.20,
-    "hospital": 0.10,
-    "school": 0.15,
-    "park": 0.10,
-    "age": 0.10,
-    "area": 0.00,
-    "floor": 0.00,
-    "parking": 0.05,
+    "hospital": 0.20,
+    "school": 0.20,
+    "park": 0.20,
 }
 
 
@@ -191,29 +187,31 @@ async def analyze_property(request: PropertyAnalysisRequest):
     if not similar_cases:
         print("[WARNING] No similar cases found, using fallback mock cases")
 
+        asking_val = request.askingPrice if request.askingPrice > 0 else 1000.0
+        area_val = request.area if request.area > 0 else 30.0
         similar_cases = [
             {
-                "address": "台北市信義區模擬案例",
-                "price": 1200,
-                "area": request.area,
-                "age": request.age,
-                "unit_price": 40,
+                "address": f"{request.address or '台北市信義區'}模擬案例一",
+                "price": round(asking_val * 0.9, 0),
+                "area": area_val,
+                "age": max(1, request.age),
+                "unit_price": round((asking_val * 0.9) / area_val, 2),
                 "transaction_date": "2024-01",
             },
             {
-                "address": "台北市大安區模擬案例",
-                "price": 1150,
-                "area": request.area,
-                "age": request.age,
-                "unit_price": 38,
+                "address": f"{request.address or '台北市信義區'}模擬案例二",
+                "price": round(asking_val * 0.95, 0),
+                "area": area_val,
+                "age": max(1, request.age),
+                "unit_price": round((asking_val * 0.95) / area_val, 2),
                 "transaction_date": "2024-02",
             },
             {
-                "address": "台北市松山區模擬案例",
-                "price": 1250,
-                "area": request.area,
-                "age": request.age,
-                "unit_price": 42,
+                "address": f"{request.address or '台北市信義區'}模擬案例三",
+                "price": round(asking_val * 1.05, 0),
+                "area": area_val,
+                "age": max(1, request.age),
+                "unit_price": round((asking_val * 1.05) / area_val, 2),
                 "transaction_date": "2024-03",
             },
         ]
@@ -232,10 +230,10 @@ async def analyze_property(request: PropertyAnalysisRequest):
     facility_scores = calculate_facility_scores(nearby_facilities)
 
     property_scores = calculate_property_scores(
-        request.age,
-        request.floor,
-        request.totalFloors,
-        request.parking,
+        age=request.age,
+        floor=request.floor,
+        total_floors=request.totalFloors,
+        parking=request.parking,
     )
 
     price_score = calculate_price_score(
@@ -273,19 +271,19 @@ async def analyze_property(request: PropertyAnalysisRequest):
         nearby_facilities={
             "mrt": FacilityInfo(
                 distance=nearby_facilities["mrt"][0],
-                rating=nearby_facilities["mrt"][1],
+                score=facility_scores["mrt"],
             ),
             "hospital": FacilityInfo(
                 distance=nearby_facilities["hospital"][0],
-                rating=nearby_facilities["hospital"][1],
+                score=facility_scores["hospital"],
             ),
             "school": FacilityInfo(
                 distance=nearby_facilities["school"][0],
-                rating=nearby_facilities["school"][1],
+                score=facility_scores["school"],
             ),
             "park": FacilityInfo(
                 distance=nearby_facilities["park"][0],
-                rating=nearby_facilities["park"][1],
+                score=facility_scores["park"],
             ),
         },
         similar_cases=[
@@ -294,7 +292,6 @@ async def analyze_property(request: PropertyAnalysisRequest):
                 price=case["price"],
                 area=case["area"],
                 age=case["age"],
-                unit_price=case["unit_price"],
                 transaction_date=case["transaction_date"],
             )
             for case in similar_cases[:3]

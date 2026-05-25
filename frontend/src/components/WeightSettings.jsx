@@ -1,24 +1,16 @@
 import { useState } from 'react'
 
 const WeightSettings = ({ weights, onWeightsChange, onReset }) => {
-  const [localWeights, setLocalWeights] = useState(weights)
-
   const handleWeightChange = (key, value) => {
-    const newVal = Math.max(0, Math.min(100, parseInt(value) || 0))
+    const newVal = parseInt(value, 10)
     const newWeights = {
-      ...localWeights,
+      ...weights,
       [key]: newVal,
     }
-    setLocalWeights(newWeights)
     onWeightsChange(newWeights)
   }
 
-  const handleReset = () => {
-    setLocalWeights(weights)
-    onReset()
-  }
-
-  const total = Object.values(localWeights).reduce((a, b) => a + b, 0)
+  const total = Object.values(weights).reduce((a, b) => a + b, 0)
 
   const weightLabels = {
     price: '價格合理性',
@@ -26,10 +18,6 @@ const WeightSettings = ({ weights, onWeightsChange, onReset }) => {
     hospital: '醫院距離',
     school: '學校距離',
     park: '公園距離',
-    age: '屋齡',
-    area: '坪數',
-    floor: '樓層',
-    parking: '車位',
   }
 
   const weightDescriptions = {
@@ -38,76 +26,59 @@ const WeightSettings = ({ weights, onWeightsChange, onReset }) => {
     hospital: '最近醫院的距離',
     school: '最近學校的距離',
     park: '最近公園的距離',
-    age: '房屋年齡',
-    area: '房屋坪數',
-    floor: '房屋樓層位置',
-    parking: '是否有停車位',
   }
 
+  const options = [0, 20, 40, 60, 80, 100]
+
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
-      <h3 className="text-lg font-bold text-gray-800 mb-2">
-        權重設定 (進階)
+    <div className="bg-white rounded-lg shadow-lg p-6 mt-6 border border-gray-100">
+      <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
+        ⚙️ 權重設定
       </h3>
       <p className="text-xs text-gray-500 mb-4">
-        調整各項因素對分析結果的影響程度
+        調整各項因素對分析結果的影響程度。請使用下拉選單選擇權重（系統將在分析時自動進行等比例轉換）。
       </p>
 
       <div className="space-y-4">
-        {Object.entries(localWeights).map(([key, value]) => (
-          <div key={key} className="border-b pb-3">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <label className="text-sm font-medium text-gray-700 block">
-                  {weightLabels[key]}
-                </label>
-                <p className="text-xs text-gray-500 mt-1">
-                  {weightDescriptions[key]}
-                </p>
-              </div>
-              <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                {value}%
-              </span>
+        {Object.entries(weights).map(([key, value]) => (
+          <div key={key} className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
+            <div className="flex-1 pr-4">
+              <label className="text-sm font-semibold text-gray-700 block">
+                {weightLabels[key]}
+              </label>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {weightDescriptions[key]}
+              </p>
             </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={value}
-              onChange={(e) => handleWeightChange(key, e.target.value)}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-            />
+            <div className="w-28">
+              <select
+                value={value}
+                onChange={(e) => handleWeightChange(key, e.target.value)}
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-gray-800 bg-white shadow-sm cursor-pointer hover:border-gray-400 transition"
+              >
+                {options.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex justify-between items-center mb-2">
-          <p className="text-sm font-medium text-gray-800">
-            權重總和
-          </p>
-          <span className={`text-lg font-bold px-3 py-1 rounded ${
-            total === 100
-              ? 'text-green-700 bg-green-100'
-              : 'text-orange-700 bg-orange-100'
-          }`}>
-            {total}%
-          </span>
-        </div>
-        {total === 100 ? (
-          <p className="text-xs text-green-600">
-            ✓ 權重設置完成，可以進行分析
-          </p>
-        ) : (
-          <p className="text-xs text-orange-600">
-            ⚠ 建議調整至 100% 以獲得最佳分析結果
-          </p>
-        )}
+      <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg flex justify-between items-center shadow-sm">
+        <span className="text-sm font-medium text-gray-700">
+          權重數值總和
+        </span>
+        <span className="text-lg font-bold text-blue-700">
+          {total}
+        </span>
       </div>
 
       <button
-        onClick={handleReset}
-        className="w-full mt-4 bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md hover:bg-gray-400 transition text-sm"
+        onClick={onReset}
+        className="w-full mt-4 bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-md hover:bg-gray-100 transition text-sm border border-gray-200"
       >
         恢復預設權重
       </button>

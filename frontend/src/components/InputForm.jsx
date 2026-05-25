@@ -6,31 +6,47 @@ const InputForm = ({ onSubmit, loading, onToggleWeights }) => {
     askingPrice: '',
     area: '',
     age: '',
-    buildingType: 'building',
+    buildingType: '電梯大樓',
     floor: '',
     totalFloors: '',
     parking: 'yes',
-    layout: '',
+    rooms: '',
+    livingRooms: '',
+    bathrooms: '',
   })
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value === '' ? '' : isNaN(value) ? value : value,
-    }))
+    let newData = {
+      ...formData,
+      [name]: value,
+    }
+
+    if (name === 'buildingType' && value === '透天') {
+      newData.floor = ''
+    }
+
+    setFormData(newData)
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    const isTownhouse = formData.buildingType === '透天'
+
     const numericData = {
-      ...formData,
+      address: formData.address,
       askingPrice: parseFloat(formData.askingPrice),
       area: parseFloat(formData.area),
       age: parseInt(formData.age),
-      floor: parseInt(formData.floor),
+      buildingType: formData.buildingType,
+      floor: isTownhouse ? null : (formData.floor ? parseInt(formData.floor) : null),
       totalFloors: parseInt(formData.totalFloors),
+      parking: formData.parking,
+      rooms: parseInt(formData.rooms),
+      livingRooms: parseInt(formData.livingRooms),
+      bathrooms: parseInt(formData.bathrooms),
+      layout: `${formData.rooms}房${formData.livingRooms}廳${formData.bathrooms}衛`,
     }
 
     onSubmit(numericData)
@@ -111,27 +127,13 @@ const InputForm = ({ onSubmit, loading, onToggleWeights }) => {
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="apartment">公寓</option>
-          <option value="building">電梯大樓</option>
-          <option value="house">透天</option>
+          <option value="電梯大樓">電梯大樓</option>
+          <option value="公寓">公寓</option>
+          <option value="透天">透天</option>
         </select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            樓層
-          </label>
-          <input
-            type="number"
-            name="floor"
-            value={formData.floor}
-            onChange={handleChange}
-            placeholder="5"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             總樓層
@@ -145,6 +147,66 @@ const InputForm = ({ onSubmit, loading, onToggleWeights }) => {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
+        </div>
+        {formData.buildingType !== '透天' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              所在樓層
+            </label>
+            <input
+              type="number"
+              name="floor"
+              value={formData.floor}
+              onChange={handleChange}
+              placeholder="5"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required={formData.buildingType !== '透天'}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-gray-700">
+          格局
+        </label>
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">房</label>
+            <input
+              type="number"
+              name="rooms"
+              value={formData.rooms}
+              onChange={handleChange}
+              placeholder="2"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">廳</label>
+            <input
+              type="number"
+              name="livingRooms"
+              value={formData.livingRooms}
+              onChange={handleChange}
+              placeholder="1"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">衛</label>
+            <input
+              type="number"
+              name="bathrooms"
+              value={formData.bathrooms}
+              onChange={handleChange}
+              placeholder="1"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
         </div>
       </div>
 
@@ -161,20 +223,6 @@ const InputForm = ({ onSubmit, loading, onToggleWeights }) => {
           <option value="yes">有</option>
           <option value="no">無</option>
         </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          格局
-        </label>
-        <input
-          type="text"
-          name="layout"
-          value={formData.layout}
-          onChange={handleChange}
-          placeholder="2房1廳1衛"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
       </div>
 
       <div className="pt-4 space-y-3">

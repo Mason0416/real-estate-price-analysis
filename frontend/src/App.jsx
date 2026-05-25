@@ -9,83 +9,76 @@ function App() {
   const [showWeights, setShowWeights] = useState(false)
 
   const defaultWeights = {
-    price: 30,
+    price: 20,
     mrt: 20,
-    hospital: 10,
-    school: 15,
-    park: 10,
-    age: 10,
-    area: 0,
-    floor: 0,
-    parking: 5,
+    hospital: 20,
+    school: 20,
+    park: 20,
   }
 
   const [weights, setWeights] = useState(defaultWeights)
 
   const normalizeWeights = (weightObj) => {
     const total = Object.values(weightObj).reduce((a, b) => a + b, 0)
-    if (total === 0) return weightObj
+    if (total === 0) {
+      return {
+        price: 0.2,
+        mrt: 0.2,
+        hospital: 0.2,
+        school: 0.2,
+        park: 0.2
+      }
+    }
 
     return Object.entries(weightObj).reduce((acc, [key, value]) => {
-      acc[key] = Math.round((value / total) * 100) / 100
+      acc[key] = value / total
       return acc
     }, {})
   }
 
   const API_URL =
-
     import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   const handleSubmit = async (formData) => {
-
     setLoading(true)
 
     try {
-
       const normalizedWeights = normalizeWeights(weights)
+      const isTownhouse = formData.buildingType === "透天"
 
       const payload = {
-
-        ...formData,
-
-        weights: normalizedWeights,
-
+        address: formData.address,
+        askingPrice: Number(formData.askingPrice),
+        area: Number(formData.area),
+        age: Number(formData.age),
+        buildingType: formData.buildingType,
+        floor: isTownhouse ? null : (formData.floor ? Number(formData.floor) : null),
+        totalFloors: Number(formData.totalFloors),
+        parking: formData.parking,
+        layout: formData.layout,
+        weights: normalizedWeights
       }
 
       console.log('Sending payload:', payload)
 
       const response = await fetch(`${API_URL}/analyze`, {
-
         method: 'POST',
-
         headers: { 'Content-Type': 'application/json' },
-
         body: JSON.stringify(payload),
-
       })
 
       if (!response.ok) {
-
         throw new Error(`API error: ${response.status}`)
-
       }
 
       const data = await response.json()
-
       setResults(data)
-
     } catch (error) {
-
       console.error('Error:', error)
-
       alert(`分析失敗: ${error.message}`)
-
     } finally {
-
       setLoading(false)
-
     }
-
   }
 
   const handleWeightsChange = (newWeights) => {

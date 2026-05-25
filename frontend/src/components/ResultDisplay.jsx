@@ -10,18 +10,18 @@ const ResultDisplay = ({ results }) => {
   } = results
 
   const getPriceColor = (assessment) => {
-    if (assessment.includes('可考慮購買')) return 'text-green-700 bg-green-50 border-green-200'
-    if (assessment.includes('合理')) return 'text-blue-700 bg-blue-50 border-blue-200'
+    if (assessment.includes('略低於')) return 'text-green-700 bg-green-50 border-green-200'
+    if (assessment.includes('價格合理')) return 'text-blue-700 bg-blue-50 border-blue-200'
     if (assessment.includes('略高')) return 'text-yellow-700 bg-yellow-50 border-yellow-200'
-    if (assessment.includes('建議議價')) return 'text-orange-700 bg-orange-50 border-orange-200'
+    if (assessment.includes('偏高') || assessment.includes('建議議價') || assessment.includes('明顯低於')) return 'text-orange-700 bg-orange-50 border-orange-200'
     return 'text-red-700 bg-red-50 border-red-200'
   }
 
   const getPriceBorderColor = (assessment) => {
-    if (assessment.includes('可考慮購買')) return 'border-green-500'
-    if (assessment.includes('合理')) return 'border-blue-500'
+    if (assessment.includes('略低於')) return 'border-green-500'
+    if (assessment.includes('價格合理')) return 'border-blue-500'
     if (assessment.includes('略高')) return 'border-yellow-500'
-    if (assessment.includes('建議議價')) return 'border-orange-500'
+    if (assessment.includes('偏高') || assessment.includes('建議議價') || assessment.includes('明顯低於')) return 'border-orange-500'
     return 'border-red-500'
   }
 
@@ -58,8 +58,14 @@ const ResultDisplay = ({ results }) => {
                     </span>
                   )}
                   {asking_price < reasonable_price_range.min && (
-                    <span className="text-[11px] sm:text-xs font-semibold text-emerald-600 mt-1">
-                      ✨ 低於合理價格
+                    <span className={`text-[11px] sm:text-xs font-semibold mt-1 ${
+                      ((reasonable_price_range.min - asking_price) / reasonable_price_range.min) > 0.15
+                        ? 'text-red-500'
+                        : 'text-emerald-600'
+                    }`}>
+                      {((reasonable_price_range.min - asking_price) / reasonable_price_range.min) > 0.15
+                        ? '⚠️ 價格異常偏低'
+                        : '✨ 低於合理價格'}
                     </span>
                   )}
                 </div>

@@ -92,20 +92,32 @@ def calculate_reasonable_price(similar_cases: List[Dict]) -> Tuple[float, Dict[s
     }
 
 def assess_price(asking_price: float, area: float, reasonable_range: Dict[str, float]) -> str:
-    asking_unit_price = asking_price / area
-    median_unit = (reasonable_range['min'] + reasonable_range['max']) / 2
-    ratio = asking_unit_price / median_unit
+    seller_unit_price = asking_price / area
+    min_price = reasonable_range['min']
+    max_price = reasonable_range['max']
 
-    if ratio < 0.95:
-        return '可考慮購買'
-    elif ratio <= 1.05:
-        return '合理'
-    elif ratio <= 1.10:
-        return '略高'
-    elif ratio <= 1.20:
-        return '建議議價'
-    else:
+    if min_price <= seller_unit_price <= max_price:
+        return '價格合理'
+
+    if seller_unit_price < min_price:
+        under_ratio = (min_price - seller_unit_price) / min_price
+        if under_ratio <= 0.05:
+            return '略低於市場合理價格'
+        elif under_ratio <= 0.15:
+            return '明顯低於市場合理價格，請確認是否有特殊條件'
+        else:
+            return '異常低價，請謹慎確認房屋狀況與產權'
+
+    # seller_unit_price > max_price
+    over_ratio = (seller_unit_price - max_price) / max_price
+    if over_ratio <= 0.05:
+        return '略高，建議議價'
+    elif over_ratio <= 0.15:
+        return '偏高，建議議價'
+    elif over_ratio <= 0.30:
         return '明顯偏高'
+    else:
+        return '嚴重偏高，不建議直接購買'
 
 def calculate_facility_scores(nearby_facilities: Dict[str, Tuple[float, int]]) -> Dict[str, int]:
     scores = {}
@@ -163,18 +175,29 @@ def calculate_property_scores(
     }
 
 def calculate_price_score(asking_price: float, area: float, reasonable_range: Dict[str, float]) -> int:
-    asking_unit_price = asking_price / area
-    median_unit = (reasonable_range['min'] + reasonable_range['max']) / 2
+    seller_unit_price = asking_price / area
+    min_price = reasonable_range['min']
+    max_price = reasonable_range['max']
 
-    diff_percent = ((asking_unit_price - median_unit) / median_unit) * 100
-
-    if diff_percent <= -10:
+    if min_price <= seller_unit_price <= max_price:
         return 100
-    elif diff_percent <= 0:
+
+    if seller_unit_price < min_price:
+        under_ratio = (min_price - seller_unit_price) / min_price
+        if under_ratio <= 0.05:
+            return 80
+        elif under_ratio <= 0.15:
+            return 60
+        else:
+            return 40
+
+    # seller_unit_price > max_price
+    over_ratio = (seller_unit_price - max_price) / max_price
+    if over_ratio <= 0.05:
         return 80
-    elif diff_percent <= 10:
+    elif over_ratio <= 0.15:
         return 60
-    elif diff_percent <= 20:
+    elif over_ratio <= 0.30:
         return 40
     else:
         return 20

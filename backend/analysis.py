@@ -26,7 +26,7 @@ def calculate_facility_distance_mock(lat: float, lon: float, facility_type: str)
     distances = {
         'mrt': (450, 80),
         'hospital': (650, 60),
-        'school': (300, 80),
+        'school': (200, 100),
         'park': (500, 80),
     }
     return distances.get(facility_type, (1000, 60))

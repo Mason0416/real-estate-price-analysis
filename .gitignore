@@ -47,3 +47,6 @@ dist/
 
 # Logs
 *.log
+*.docx
+
+*.pdf

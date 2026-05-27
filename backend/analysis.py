@@ -38,45 +38,106 @@ def find_similar_cases(
     building_type: str,
     lat: float,
     lon: float,
+    floor: Optional[int],
+    total_floors: int,
+    rooms: int,
+    living_rooms: int,
+    bathrooms: int,
 ) -> List[Dict]:
     db = SessionLocal()
+    cases = db.query(TransactionRecord).all()
+    db.close()
 
-    area_min, area_max = area * 0.8, area * 1.2
-    age_min, age_max = max(0, age - 5), age + 5
+    if not cases:
+        return []
+
+    target_district = ""
+    for d in ["大安", "信義", "中山", "松山", "文山", "南港", "北投", "士林", "內湖", "中正"]:
+        if d in address:
+            target_district = d
+            break
 
     type_mapping = {
         "電梯大樓": "building",
         "公寓": "apartment",
         "透天": "house"
     }
-    mapped_type = type_mapping.get(building_type, building_type)
-
-    query = db.query(TransactionRecord).filter(
-        TransactionRecord.building_type.in_([building_type, mapped_type]),
-        TransactionRecord.area.between(area_min, area_max),
-        TransactionRecord.age.between(age_min, age_max),
-    )
-
-    cases = query.all()
-    db.close()
-
-    if not cases:
-        return []
+    target_mapped_type = type_mapping.get(building_type, building_type)
 
     similar = []
-    for case in cases[:10]:
-        distance = ((case.latitude - lat) ** 2 + (case.longitude - lon) ** 2) ** 0.5
+    for case in cases:
+        # Distance calculation
+        dist_deg = ((case.latitude - lat) ** 2 + (case.longitude - lon) ** 2) ** 0.5
+        distance_in_meters = dist_deg * 111000
+        distance_score = distance_in_meters / 100
+
+        # Area score
+        area_score = abs(case.area - area) * 2
+
+        # Age score
+        age_score = abs(case.age - age) * 1.5
+
+        # Building type score
+        case_mapped_type = type_mapping.get(case.building_type, case.building_type)
+        building_type_score = 0 if case_mapped_type == target_mapped_type else 50
+
+        # Floor score
+        if floor is None or case.floor is None:
+            floor_score = 0
+        else:
+            floor_score = abs(case.floor - floor) * 2
+
+        # Total floors score
+        case_total_floors = case.total_floors if case.total_floors is not None else 1
+        total_floors_score = abs(case_total_floors - total_floors) * 1
+
+        # Rooms score
+        case_rooms = case.rooms if case.rooms is not None else 0
+        rooms_score = abs(case_rooms - rooms) * 10
+
+        # Living rooms score
+        case_living_rooms = case.living_rooms if case.living_rooms is not None else 0
+        living_rooms_score = abs(case_living_rooms - living_rooms) * 8
+
+        # Bathrooms score
+        case_bathrooms = case.bathrooms if case.bathrooms is not None else 0
+        bathrooms_score = abs(case_bathrooms - bathrooms) * 8
+
+        # District score
+        case_district = case.district if case.district else ""
+        district_score = 0 if case_district == target_district else 30
+
+        # Total similarity score
+        score = (
+            distance_score +
+            area_score +
+            age_score +
+            building_type_score +
+            floor_score +
+            total_floors_score +
+            rooms_score +
+            living_rooms_score +
+            bathrooms_score +
+            district_score
+        )
+
         similar.append({
             'address': case.address,
             'price': case.price,
             'area': case.area,
+            'unit_price': round(case.price / case.area, 1),
             'age': case.age,
-            'unit_price': round(case.price / case.area, 2),
+            'layout': case.layout if case.layout else f"{case_rooms}房{case_living_rooms}廳{case_bathrooms}衛",
+            'rooms': case_rooms,
+            'living_rooms': case_living_rooms,
+            'bathrooms': case_bathrooms,
+            'distance': round(distance_in_meters, 1),
+            'similarity_score': round(score, 2),
             'transaction_date': case.transaction_date,
-            'distance_km': round(distance * 111, 2),
         })
 
-    similar.sort(key=lambda x: x['distance_km'])
+    # Sort by similarity score ascending
+    similar.sort(key=lambda x: x['similarity_score'])
     return similar[:5]
 
 def calculate_reasonable_price(similar_cases: List[Dict]) -> Tuple[float, Dict[str, float]]:
@@ -84,11 +145,11 @@ def calculate_reasonable_price(similar_cases: List[Dict]) -> Tuple[float, Dict[s
         return None, None
 
     unit_prices = [case['unit_price'] for case in similar_cases]
-    median_price = statistics.median(unit_prices)
+    median_unit_price = statistics.median(unit_prices)
 
-    return median_price, {
-        'min': round(median_price * 0.95, 2),
-        'max': round(median_price * 1.05, 2),
+    return median_unit_price, {
+        'min': round(median_unit_price * 0.9, 2),
+        'max': round(median_unit_price * 1.1, 2),
     }
 
 def assess_price(asking_price: float, area: float, reasonable_range: Dict[str, float]) -> str:

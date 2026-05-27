@@ -41,6 +41,11 @@ class TransactionRecord(Base):
     floor = Column(Integer)
     transaction_date = Column(String)
     district = Column(String)
+    total_floors = Column(Integer)
+    layout = Column(String)
+    rooms = Column(Integer)
+    living_rooms = Column(Integer)
+    bathrooms = Column(Integer)
 
 Base.metadata.create_all(bind=engine)
 

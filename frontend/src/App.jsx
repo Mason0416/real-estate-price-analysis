@@ -56,6 +56,9 @@ function App() {
         totalFloors: Number(formData.totalFloors),
         parking: formData.parking,
         layout: formData.layout,
+        rooms: Number(formData.rooms),
+        livingRooms: Number(formData.livingRooms),
+        bathrooms: Number(formData.bathrooms),
         weights: normalizedWeights
       }
 

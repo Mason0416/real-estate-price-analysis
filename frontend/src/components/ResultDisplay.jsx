@@ -31,6 +31,7 @@ const ResultDisplay = ({ results }) => {
   }
 
   const downPayment = Math.round(asking_price * 0.3)
+  const sellerUnitPrice = asking_price / (results.area || 1)
 
   return (
     <div className="space-y-6">
@@ -71,6 +72,19 @@ const ResultDisplay = ({ results }) => {
                 </div>
                 <span className="text-xl sm:text-2xl md:text-3xl font-bold text-red-600 whitespace-nowrap">
                   {Math.round(asking_price)}萬
+                </span>
+              </div>
+
+              {/* 每坪單價 */}
+              <div className="flex justify-between items-center py-4 border-b border-gray-100">
+                <div className="flex flex-col pr-4">
+                  <span className="text-gray-500 font-medium text-sm sm:text-base">每坪單價</span>
+                  <span className="text-[11px] sm:text-xs text-gray-400 font-normal mt-1">
+                    由賣家定價與坪數計算得出
+                  </span>
+                </div>
+                <span className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 whitespace-nowrap">
+                  {sellerUnitPrice.toFixed(1)}萬 / 坪
                 </span>
               </div>
 
@@ -197,28 +211,37 @@ const ResultDisplay = ({ results }) => {
         {/* 5. 相似成交案例 */}
         {similar_cases && similar_cases.length > 0 && (
           <div className="mb-4">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">
-              5. 相似成交案例
+            <h3 className="text-lg font-bold text-gray-800 mb-1">
+              5. 最相似成交案例 Top 5
             </h3>
+            <p className="text-xs text-gray-500 mb-3">
+              排序依據：距離、坪數、屋齡、格局、建物型態等條件，不包含價格
+            </p>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse border border-gray-200 rounded-lg overflow-hidden">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200 text-left">
                     <th className="px-4 py-2.5 text-sm font-semibold text-gray-700">成交地址</th>
-                    <th className="px-4 py-2.5 text-sm font-semibold text-gray-700">成交日期</th>
-                    <th className="px-4 py-2.5 text-sm font-semibold text-gray-700">坪數</th>
-                    <th className="px-4 py-2.5 text-sm font-semibold text-gray-700">屋齡</th>
                     <th className="px-4 py-2.5 text-sm font-semibold text-gray-700 text-right">成交總價</th>
+                    <th className="px-4 py-2.5 text-sm font-semibold text-gray-700 text-right">坪數</th>
+                    <th className="px-4 py-2.5 text-sm font-semibold text-gray-700 text-right">每坪單價</th>
+                    <th className="px-4 py-2.5 text-sm font-semibold text-gray-700 text-right">屋齡</th>
+                    <th className="px-4 py-2.5 text-sm font-semibold text-gray-700 text-center">格局</th>
+                    <th className="px-4 py-2.5 text-sm font-semibold text-gray-700 text-right">距離</th>
+                    <th className="px-4 py-2.5 text-sm font-semibold text-gray-700">成交日期</th>
                   </tr>
                 </thead>
                 <tbody>
                   {similar_cases.map((case_, idx) => (
                     <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 transition">
                       <td className="px-4 py-3 text-sm text-gray-800 font-medium">{case_.address}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{case_.transaction_date}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{case_.area}坪</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{case_.age}年</td>
                       <td className="px-4 py-3 text-sm font-bold text-gray-800 text-right">{Math.round(case_.price)}萬</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 text-right">{case_.area}坪</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-blue-600 text-right">{(case_.unit_price || (case_.price / case_.area)).toFixed(1)}萬 / 坪</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 text-right">{case_.age}年</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 text-center">{case_.layout}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 text-right">{Math.round(case_.distance)}m</td>
+                      <td className="px-4 py-3 text-sm text-gray-650">{case_.transaction_date}</td>
                     </tr>
                   ))}
                 </tbody>
